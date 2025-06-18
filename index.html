@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Offline barcode scanner web app for QR codes and PDF417" />
+    <meta name="theme-color" content="#007bff" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>Barcode Scanner</title>
+  </head>
+  <body>
+    <div id="app">
+      <main class="container">
+        <h1>Barcode Scanner</h1>
+        <div id="landing-page" class="page">
+          <div class="options-container">
+            <button id="open-camera-btn" class="primary-button">
+              📷 Open Camera
+            </button>
+            
+            <div class="divider">
+              <span>or</span>
+            </div>
+            
+            <div class="upload-section">
+              <input type="file" id="image-upload" accept="image/*" class="hidden" />
+              <button id="upload-btn" class="secondary-button">
+                📁 Upload Image
+              </button>
+              <div id="drop-zone" class="drop-zone">
+                <p>📎 Drag & drop an image here</p>
+                <small>Supports PNG, JPEG, WebP</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="scanner-page" class="page hidden">
+          <video id="camera-preview" autoplay muted playsinline></video>
+          <canvas id="capture-canvas" class="hidden"></canvas>
+          <div class="controls">
+            <button id="stop-scan-btn" class="secondary-button">
+              Stop Scanning
+            </button>
+          </div>
+        </div>
+        
+        <div id="result-page" class="page hidden">
+          <div class="result-container">
+            <img id="captured-image" alt="Captured frame" />
+            <div class="result-text">
+              <h2>Scan Result:</h2>
+              <div id="decoded-text"></div>
+            </div>
+            <button id="scan-again-btn" class="primary-button">
+              Scan Again
+            </button>
+          </div>
+        </div>
+      </main>
+      
+      <div id="error-message" class="error hidden"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
