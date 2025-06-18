@@ -413,6 +413,98 @@ button:disabled {
   }
 }
 
+/* Provider Selector */
+.provider-selector {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background-color: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+.provider-selector label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: var(--spacing-sm);
+  color: var(--dark-gray);
+}
+
+.provider-dropdown {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  background-color: white;
+  cursor: pointer;
+}
+
+.provider-dropdown:focus {
+  outline: 3px solid rgba(0, 123, 255, 0.25);
+  outline-offset: 2px;
+  border-color: var(--primary-color);
+}
+
+.provider-info {
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background-color: var(--light-gray);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  color: var(--secondary-color);
+  line-height: 1.4;
+}
+
+/* Provider Badges */
+.provider-badge {
+  display: inline-block;
+  background-color: var(--primary-color);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: calc(var(--border-radius) / 2);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  margin-bottom: var(--spacing-sm);
+}
+
+.scanner-header {
+  position: absolute;
+  top: var(--spacing-md);
+  left: var(--spacing-md);
+  right: var(--spacing-md);
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.result-header {
+  align-self: stretch;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Timing Display */
+.scan-timing, .decode-timing {
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: calc(var(--border-radius) / 2);
+  font-size: var(--font-size-sm);
+  font-family: monospace;
+}
+
+.decode-timing {
+  background-color: var(--success-color);
+  color: white;
+}
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   button {
@@ -422,4 +514,23 @@ button:disabled {
   .error {
     animation: none;
   }
+}
+
+.benchmark-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--spacing-md);
+}
+
+.benchmark-table th,
+.benchmark-table td {
+  border: 1px solid var(--border-color);
+  padding: var(--spacing-xs);
+  text-align: center;
+  font-size: var(--font-size-sm);
+}
+
+.benchmark-table th {
+  background-color: var(--light-gray);
+  font-weight: 600;
 }

@@ -14,6 +14,16 @@
       <main class="container">
         <h1>Barcode Scanner</h1>
         <div id="landing-page" class="page">
+          <div class="provider-selector">
+            <label for="provider-select">Scanner Engine:</label>
+            <select id="provider-select" class="provider-dropdown">
+              <option value="">Loading...</option>
+            </select>
+            <div id="provider-info" class="provider-info">
+              <span id="provider-description"></span>
+            </div>
+          </div>
+          
           <div class="options-container">
             <button id="open-camera-btn" class="primary-button">
               📷 Open Camera
@@ -28,6 +38,8 @@
               <button id="upload-btn" class="secondary-button">
                 📁 Upload Image
               </button>
+              <button id="benchmark-btn" class="secondary-button">📈 Benchmark</button>
+              <input type="file" id="benchmark-upload" accept="image/*" class="hidden" />
               <div id="drop-zone" class="drop-zone">
                 <p>📎 Drag & drop an image here</p>
                 <small>Supports PNG, JPEG, WebP</small>
@@ -37,6 +49,10 @@
         </div>
         
         <div id="scanner-page" class="page hidden">
+          <div class="scanner-header">
+            <div id="scanner-provider-badge" class="provider-badge"></div>
+            <div id="scan-timing" class="scan-timing hidden"></div>
+          </div>
           <video id="camera-preview" autoplay muted playsinline></video>
           <canvas id="capture-canvas" class="hidden"></canvas>
           <div class="controls">
@@ -48,6 +64,10 @@
         
         <div id="result-page" class="page hidden">
           <div class="result-container">
+            <div class="result-header">
+              <div id="result-provider-badge" class="provider-badge"></div>
+              <div id="decode-timing" class="decode-timing"></div>
+            </div>
             <img id="captured-image" alt="Captured frame" />
             <div class="result-text">
               <h2>Scan Result:</h2>

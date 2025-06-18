@@ -1,15 +1,12 @@
-import { BrowserMultiFormatReader } from '@zxing/browser';
+import type { IBarcodeProvider, ScanResult, ScannerEventType } from './scanners/IBarcodeProvider';
+import { ProviderRegistry } from './scanners/ProviderRegistry';
 import { logger } from './logger';
 
-export interface ScanResult {
-    text: string;
-    imageData: string;
-}
-
-export type ScannerEventType = 'success' | 'error';
+export type { ScanResult, ScannerEventType };
 
 export class BarcodeScanner {
-    private codeReader: BrowserMultiFormatReader;
+    private providerRegistry: ProviderRegistry;
+    private currentProvider: IBarcodeProvider | null = null;
     private videoElement: HTMLVideoElement;
     private canvasElement: HTMLCanvasElement;
     private isScanning: boolean = false;
@@ -21,8 +18,7 @@ export class BarcodeScanner {
         logger.group('Scanner', 'Constructor');
 
         try {
-            this.codeReader = new BrowserMultiFormatReader();
-            logger.debug('Scanner', 'ZXing BrowserMultiFormatReader created');
+            this.providerRegistry = ProviderRegistry.getInstance();
 
             this.videoElement = document.getElementById('camera-preview') as HTMLVideoElement;
             this.canvasElement = document.getElementById('capture-canvas') as HTMLCanvasElement;
@@ -74,6 +70,12 @@ export class BarcodeScanner {
         logger.time('Camera Initialization');
 
         try {
+            // Initialize provider if not already done
+            if (!this.currentProvider) {
+                this.currentProvider = await this.providerRegistry.initializeDefaultProvider();
+                logger.debug('Scanner', `Using provider: ${this.currentProvider.name}`);
+            }
+
             // Request camera access
             const constraints: MediaStreamConstraints = {
                 video: {
@@ -138,41 +140,28 @@ export class BarcodeScanner {
             const result = await this.scanFrame();
             if (result) {
                 const imageData = this.captureFrame();
-                this.emit('success', { text: result.getText(), imageData });
+                this.emit('success', { text: result, imageData });
                 return;
             }
         } catch (error) {
             // Ignore individual frame scan errors, continue scanning
-            console.debug('Frame scan error:', error);
+            logger.debug('Scanner', 'Frame scan error', error);
         }
 
         // Continue scanning at ~10 fps
         setTimeout(() => this.startScanningLoop(), 100);
     }
 
-    private async scanFrame(): Promise<any | null> {
-        if (!this.videoElement.videoWidth || !this.videoElement.videoHeight) {
-            return null;
+    private async scanFrame(): Promise<string | null> {
+        if (!this.currentProvider) {
+            throw new Error('No provider initialized');
         }
 
-        // Draw video frame to canvas for processing
-        const context = this.canvasElement.getContext('2d');
-        if (!context) {
-            throw new Error('Cannot get canvas context');
-        }
+        logger.time('Frame Scan');
+        const result = await this.currentProvider.scanVideoFrame(this.videoElement, this.canvasElement);
+        logger.timeEnd('Frame Scan');
 
-        this.canvasElement.width = this.videoElement.videoWidth;
-        this.canvasElement.height = this.videoElement.videoHeight;
-
-        context.drawImage(this.videoElement, 0, 0);
-
-        try {
-            // Attempt to decode barcode from canvas
-            return await this.codeReader.decodeFromCanvas(this.canvasElement);
-        } catch (error) {
-            // No barcode found in this frame
-            return null;
-        }
+        return result;
     }
 
     private captureFrame(): string {
@@ -237,6 +226,11 @@ export class BarcodeScanner {
                 });
 
                 try {
+                    // Initialize provider if not already done
+                    if (!this.currentProvider) {
+                        this.currentProvider = await this.providerRegistry.initializeDefaultProvider();
+                    }
+
                     // Set canvas size to image size
                     canvas.width = img.width;
                     canvas.height = img.height;
@@ -247,8 +241,15 @@ export class BarcodeScanner {
 
                     // Attempt to decode barcode
                     logger.debug('Scanner', 'Attempting barcode decode...');
-                    const result = await this.codeReader.decodeFromCanvas(canvas);
-                    logger.info('Scanner', 'Barcode decoded successfully', { text: result.getText() });
+                    logger.time('Provider Scan');
+                    const result = await this.currentProvider.scanImage(img);
+                    logger.timeEnd('Provider Scan');
+
+                    if (!result) {
+                        throw new Error('No barcode found in the image');
+                    }
+
+                    logger.info('Scanner', 'Barcode decoded successfully', { text: result });
 
                     // Create thumbnail for display
                     const thumbnailCanvas = document.createElement('canvas');
@@ -266,7 +267,7 @@ export class BarcodeScanner {
                         logger.info('Scanner', 'Image file scan completed successfully');
 
                         resolve({
-                            text: result.getText(),
+                            text: result,
                             imageData: thumbnailCanvas.toDataURL('image/jpeg', 0.8)
                         });
                     } else {
@@ -301,6 +302,32 @@ export class BarcodeScanner {
         });
     }
 
+    public async setProvider(providerName: string): Promise<void> {
+        logger.info('Scanner', `Switching to provider: ${providerName}`);
+
+        // Stop current scanning if active
+        const wasScanning = this.isScanning;
+        if (wasScanning) {
+            this.stop();
+        }
+
+        // Switch provider
+        this.currentProvider = await this.providerRegistry.setCurrentProvider(providerName);
+
+        // Restart scanning if it was previously active
+        if (wasScanning) {
+            await this.start();
+        }
+    }
+
+    public getCurrentProvider(): IBarcodeProvider | null {
+        return this.currentProvider;
+    }
+
+    public getAvailableProviders() {
+        return this.providerRegistry.getAvailableProviders();
+    }
+
     public isSupported(): boolean {
         return !!(
             navigator.mediaDevices &&
@@ -308,5 +335,10 @@ export class BarcodeScanner {
             window.HTMLVideoElement &&
             window.HTMLCanvasElement
         );
+    }
+
+    public cleanup(): void {
+        this.stop();
+        this.providerRegistry.cleanup();
     }
 } 
