@@ -13,6 +13,7 @@ export class ProviderRegistry {
     private providers: Map<string, ProviderInfo> = new Map();
     private loadedProviders: Map<string, IBarcodeProvider> = new Map();
     private currentProvider: IBarcodeProvider | null = null;
+    private currentProviderName: string | null = null;
 
     private constructor() {
         this.registerDefaultProviders();
@@ -125,13 +126,17 @@ export class ProviderRegistry {
 
     async setCurrentProvider(providerName: string): Promise<IBarcodeProvider> {
         // Destroy current provider if exists
-        if (this.currentProvider) {
+        if (this.currentProvider && this.currentProviderName) {
             logger.debug('ProviderRegistry', `Destroying current provider: ${this.currentProvider.name}`);
             this.currentProvider.destroy?.();
+
+            // Remove destroyed provider from cache so it gets re-initialized when switched back to
+            this.loadedProviders.delete(this.currentProviderName);
         }
 
         // Load and set new provider
         this.currentProvider = await this.loadProvider(providerName);
+        this.currentProviderName = providerName;
 
         // Save preference to localStorage
         try {
@@ -170,6 +175,7 @@ export class ProviderRegistry {
         if (this.currentProvider) {
             this.currentProvider.destroy?.();
             this.currentProvider = null;
+            this.currentProviderName = null;
         }
 
         // Destroy all loaded providers

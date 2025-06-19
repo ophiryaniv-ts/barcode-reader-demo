@@ -358,6 +358,8 @@ class BarcodeApp {
 
     if (file) {
       await this.processImageFile(file)
+      // Clear the input value so the same file can be selected again
+      target.value = ''
     }
   }
 
@@ -498,6 +500,9 @@ class BarcodeApp {
     }
   }
 }
+
+// Export for testing
+export { BarcodeApp }
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {

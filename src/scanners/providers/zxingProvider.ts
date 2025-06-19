@@ -48,6 +48,7 @@ export class ZXingProvider implements IBarcodeProvider {
 
     async scanImage(image: HTMLImageElement | HTMLCanvasElement): Promise<string | null> {
         if (!this.codeReader) {
+            logger.error('ZXingProvider', 'scanImage called but provider not initialized');
             throw new Error('ZXing provider not initialized');
         }
 

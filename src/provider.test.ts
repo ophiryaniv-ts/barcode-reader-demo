@@ -1,6 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { ProviderRegistry } from './scanners/ProviderRegistry';
 import { ZXingProvider } from './scanners/providers/zxingProvider';
+
+// Mock zxing-wasm to make the test environment work
+vi.mock('zxing-wasm/reader', () => ({
+    readBarcodes: vi.fn().mockResolvedValue([{ text: 'mocked-barcode' }])
+}));
 
 describe('Provider System', () => {
     describe('ProviderRegistry', () => {
@@ -47,6 +52,38 @@ describe('Provider System', () => {
             const provider = await registry.setCurrentProvider('zxing');
 
             expect(registry.getCurrentProvider()).toBe(provider);
+        });
+
+        it('should properly handle provider switching and re-initialization', async () => {
+            const registry = ProviderRegistry.getInstance();
+
+            // Load ZXing provider initially
+            const zxingProvider1 = await registry.setCurrentProvider('zxing');
+            expect(registry.getCurrentProvider()).toBe(zxingProvider1);
+            expect(zxingProvider1.name).toBe('ZXing');
+
+            // Test with ZXing-WASM provider which should be available in test environment
+            try {
+                const switchedProvider = await registry.setCurrentProvider('zxing-wasm');
+                expect(registry.getCurrentProvider()).toBe(switchedProvider);
+                expect(switchedProvider.name).not.toBe('ZXing');
+
+                // Switch back to ZXing - should get a new instance, not the destroyed one
+                const zxingProvider2 = await registry.setCurrentProvider('zxing');
+                expect(registry.getCurrentProvider()).toBe(zxingProvider2);
+                expect(zxingProvider2.name).toBe('ZXing');
+
+                // Should be a different instance than the first one (old one was destroyed)
+                expect(zxingProvider2).not.toBe(zxingProvider1);
+            } catch (error) {
+                // If zxing-wasm isn't available, just verify the behavior with switching back to the same provider
+                const zxingProvider2 = await registry.setCurrentProvider('zxing');
+                expect(registry.getCurrentProvider()).toBe(zxingProvider2);
+                expect(zxingProvider2.name).toBe('ZXing');
+
+                // Should be a different instance than the first one (old one was destroyed)
+                expect(zxingProvider2).not.toBe(zxingProvider1);
+            }
         });
     });
 
@@ -101,6 +138,23 @@ describe('Provider System', () => {
 
             // Should not throw when destroying uninitialized provider
             expect(() => provider.destroy()).not.toThrow();
+        });
+
+        it('should fail when used after destruction', async () => {
+            const provider = new ZXingProvider();
+            await provider.init();
+
+            // Provider should work initially
+            expect(provider.name).toBe('ZXing');
+
+            // Destroy the provider
+            provider.destroy();
+
+            // Create a mock canvas
+            const canvas = document.createElement('canvas');
+
+            // Should throw error when trying to use destroyed provider
+            await expect(provider.scanImage(canvas)).rejects.toThrow('ZXing provider not initialized');
         });
     });
 }); 
