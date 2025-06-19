@@ -198,7 +198,7 @@ class BarcodeApp {
 
     this.elements.scanAgainBtn.addEventListener('click', () => {
       logger.info('UI', 'Scan again button clicked')
-      this.startScanning()
+      this.stopScanning()
     })
 
     this.elements.providerSelect.addEventListener('change', (e) => {
@@ -455,6 +455,12 @@ class BarcodeApp {
         `Avg Duration: ${report.summary.averageDuration.toFixed(2)}ms\n` +
         `Success Rate: ${(report.summary.successRate * 100).toFixed(1)}%`;
 
+      const previewUrl = await new Promise<string>((resolve) => {
+        const fr = new FileReader();
+        fr.onload = (ev) => resolve(ev.target!.result as string);
+        fr.readAsDataURL(file);
+      });
+
       // Build HTML table of detailed results
       const tableHtml = [
         '<table class="benchmark-table">',
@@ -476,7 +482,7 @@ class BarcodeApp {
       const decodedDiv = document.getElementById('decoded-text') as HTMLDivElement
       decodedDiv.innerHTML = `<pre>${summaryText}</pre>` + tableHtml
       const capturedImg = document.getElementById('captured-image') as HTMLImageElement
-      capturedImg.src = ''
+      capturedImg.src = previewUrl
       this.elements.resultPage.classList.remove('hidden')
 
       // Log full markdown to console for copy/export

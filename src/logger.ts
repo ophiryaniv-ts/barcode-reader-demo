@@ -4,7 +4,7 @@
  */
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
-export type LogCategory = 'App' | 'Scanner' | 'UI' | 'Upload' | 'ServiceWorker' | 'Utils' | 'ProviderRegistry' | 'ZXingProvider' | 'Quagga2Provider' | 'BarcodeDetectorProvider' | 'BenchmarkRunner';
+export type LogCategory = 'App' | 'Scanner' | 'UI' | 'Upload' | 'ServiceWorker' | 'Utils' | 'ProviderRegistry' | 'ZXingProvider' | 'ZXingWasmProvider' | 'Quagga2Provider' | 'BarcodeDetectorProvider' | 'DynamsoftProvider' | 'BenchmarkRunner';
 
 interface LogEntry {
     timestamp: string;
@@ -48,8 +48,10 @@ class Logger {
             Utils: 'background: #6c757d; color: white; padding: 2px 6px; border-radius: 3px;',
             ProviderRegistry: 'background: #e83e8c; color: white; padding: 2px 6px; border-radius: 3px;',
             ZXingProvider: 'background: #17a2b8; color: white; padding: 2px 6px; border-radius: 3px;',
+            ZXingWasmProvider: 'background: #ff851b; color: white; padding: 2px 6px; border-radius: 3px;',
             Quagga2Provider: 'background: #6610f2; color: white; padding: 2px 6px; border-radius: 3px;',
             BarcodeDetectorProvider: 'background: #15ca20; color: white; padding: 2px 6px; border-radius: 3px;',
+            DynamsoftProvider: 'background: #0033cc; color: white; padding: 2px 6px; border-radius: 3px;',
             BenchmarkRunner: 'background: #fd7e14; color: white; padding: 2px 6px; border-radius: 3px;',
         };
         return styles[category];

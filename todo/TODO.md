@@ -119,8 +119,8 @@ Familiarize yourself with the current implementation
 3. [x] Add skeleton provider files for:
    - [x] `quagga2Provider.ts`
    - [x] `barcodeDetectorProvider.ts`
-   - [ ] `zxingWasmProvider.ts` - TODO
-   - [ ] `dynamsoftProvider.ts` - TODO
+   - [ ] `zxingWasmProvider.ts`
+   - [ ] `dynamsoftProvider.ts`
 4. [x] Create `ProviderRegistry` that lazily loads a provider on demand (dynamic `import()` to keep bundle size low)
 5. [x] Update `BarcodeApp` to allow provider selection (dropdown on landing page)
 6. [x] Persist last-used provider in `localStorage`

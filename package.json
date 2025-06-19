@@ -30,6 +30,8 @@
   },
   "dependencies": {
     "@zxing/browser": "0.1.5",
-    "workbox-window": "7.3.0"
+    "dynamsoft-barcode-reader-bundle": "10.5.3000",
+    "workbox-window": "7.3.0",
+    "zxing-wasm": "2.1.2"
   }
 }

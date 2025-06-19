@@ -80,6 +80,7 @@ export class BarcodeDetectorProvider implements IBarcodeProvider {
                 logger.debug('BarcodeDetectorProvider', `Found ${barcodes.length} barcode(s)`, {
                     formats: barcodes.map(b => b.format)
                 });
+                logger.debug('BarcodeDetectorProvider', `Barcode: ${barcodes[0].rawValue}`);
                 return barcodes[0].rawValue;
             }
 

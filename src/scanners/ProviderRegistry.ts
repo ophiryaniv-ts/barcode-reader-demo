@@ -48,6 +48,28 @@ export class ProviderRegistry {
             }
         });
 
+        // Register ZXing WASM provider
+        this.providers.set('zxing-wasm', {
+            name: 'zxing-wasm',
+            displayName: 'ZXing (WASM)',
+            description: 'Pure WebAssembly build of ZXing – high performance',
+            loader: async () => {
+                const { ZXingWasmProvider } = await import('./providers/zxingWasmProvider');
+                return ZXingWasmProvider;
+            }
+        });
+
+        // Register Dynamsoft provider (requires license)
+        this.providers.set('dynamsoft', {
+            name: 'dynamsoft',
+            displayName: 'Dynamsoft SDK',
+            description: 'Commercial SDK with industry-leading accuracy (license required)',
+            loader: async () => {
+                const { DynamsoftProvider } = await import('./providers/dynamsoftProvider');
+                return DynamsoftProvider;
+            }
+        });
+
         // TODO: Add more providers as they are implemented
         /*
         this.providers.set('quagga2', {
