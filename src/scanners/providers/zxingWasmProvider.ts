@@ -34,22 +34,21 @@ export class ZXingWasmProvider implements IBarcodeProvider {
         }
     }
 
-    async scanVideoFrame(video: HTMLVideoElement, canvas: HTMLCanvasElement): Promise<string | null> {
+    async scanVideoFrame(video: HTMLVideoElement): Promise<string | null> {
         if (!this.readFn) throw new Error('ZXing-WASM not initialised');
-        if (!video.videoWidth || !video.videoHeight) return null;
 
-        const ctx = canvas.getContext('2d');
-        if (!ctx) throw new Error('Cannot get canvas context');
-
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0);
-
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const imageData = await createImageBitmap(video).then((imageBitmap) => {
+            const { width, height } = imageBitmap;
+            const context = new OffscreenCanvas(width, height).getContext(
+                "2d",
+            ) as OffscreenCanvasRenderingContext2D;
+            context.drawImage(imageBitmap, 0, 0, width, height);
+            return context.getImageData(0, 0, width, height);
+        });
 
         try {
             const res = await this.readFn!(imageData, readerOptions);
-            return res?.text || null;
+            return res ? res[0].text : null;
         } catch {
             return null;
         }

@@ -31,24 +31,18 @@ export class DynamsoftProvider implements IBarcodeProvider {
         }
     }
 
-    private async decodeCanvas(canvas: HTMLImageElement | HTMLCanvasElement): Promise<string | null> {
+    private async decodeCanvas(canvas: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement): Promise<string | null> {
         if (!this.reader) throw new Error('Dynamsoft provider not initialised');
         const results = await this.reader.capture(canvas);
         // find only pdf417 and qr code
         const pdf417Result = results.barcodeResultItems.find((item: any) => item.formatString === "PDF417");
-        const qrResult = results.barcodeResultItems.find((item: any) => item.formatString === "QRCode");
+        const qrResult = results.barcodeResultItems.find((item: any) => item.formatString === "QR_CODE");
         return pdf417Result ? pdf417Result.text : qrResult ? qrResult.text : null;
     }
 
-    async scanVideoFrame(video: HTMLVideoElement, canvas: HTMLCanvasElement): Promise<string | null> {
+    async scanVideoFrame(video: HTMLVideoElement): Promise<string | null> {
         if (!this.reader) throw new Error('Dynamsoft provider not initialised');
-        if (!video.videoWidth) return null;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) throw new Error('Cannot get canvas context');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0);
-        return this.decodeCanvas(canvas);
+        return this.decodeCanvas(video);
     }
 
     async scanImage(image: HTMLImageElement | HTMLCanvasElement): Promise<string | null> {

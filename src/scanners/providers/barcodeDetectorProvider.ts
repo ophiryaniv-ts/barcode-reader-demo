@@ -41,7 +41,7 @@ export class BarcodeDetectorProvider implements IBarcodeProvider {
         }
     }
 
-    async scanVideoFrame(video: HTMLVideoElement, _canvas: HTMLCanvasElement): Promise<string | null> {
+    async scanVideoFrame(video: HTMLVideoElement): Promise<string | null> {
         if (!this.detector) {
             throw new Error('BarcodeDetector provider not initialized');
         }
